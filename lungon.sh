@@ -1,5 +1,6 @@
 #!/bin/bash
 
+declare -a monsters
 declare -a map_sur
 readarray -t map_sur < <(find "$PWD" -maxdepth 1 -type d)
 temp_sur=$(cd .. && echo "$PWD")
@@ -17,8 +18,16 @@ sc_dir=${#PWD}
 health_points=100
 energy_points=100
 steps_taken=0
+points=0
 tput reset
 stty -echo
+
+# Monsters
+m=0
+m_loc=$PWD
+m_hp=0
+m_energy=0
+monsters[m]="$m,$m_loc,$m_hp,$m_energy"
 
 tput sc
 sc_dir=${#PWD}
@@ -28,7 +37,7 @@ tput cup 2 $((sc_x/3)) && echo "You are looking at ${map_sur[loc_sur]}"
 tput cup 0 $((sc_x-7)) && echo "<H>elp"
 message=""
 st_len=${#steps_taken}
-tput cup $(tput lines) 1 && echo "Health: $health_points    Energy: $energy_points    Steps Taken: $steps_taken"
+tput cup $(tput lines) 1 && echo "Health: $health_points    Energy: $energy_points    Steps Taken: $steps_taken    Points: $points"
 #tput cup $(tput lines) 2 && echo "Health: $health_points"
 #tput cup $((sc_y-1)) 20 && echo "Energy: $energy_points"
 tput cup $(tput lines) 1
@@ -74,6 +83,16 @@ do
 			else
 				message="Stop trying to walk into the wall."
 			fi
+			if [ $RANDOM -gt 1 ]; then
+				seed=$(ls -a | wc)
+				m=m+1
+				m_loc=$PWD
+				m_hp=$(( $RANDOM % $seed   + 1 ))
+				m_energy=0
+				monsters[m]="$m,$m_loc,$m_hp,$m_energy"
+			fi
+message="${monsters[m]}"
+
 			steps_taken=$((steps_taken+2))
 			;;
 		a|l|'left')
