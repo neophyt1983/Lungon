@@ -84,14 +84,15 @@ do
 				message="Stop trying to walk into the wall."
 			fi
 			if [ $RANDOM -gt 1 ]; then
-				seed=$(ls -a | wc)
-				m=m+1
+				seed=$(ls -a | wc -l)
+				m=$(( m + 1 ))
 				m_loc=$PWD
-				m_hp=$(( $RANDOM % $seed   + 1 ))
+				m_hp=$(($RANDOM%seed + 1 ))
+				#m_hp=$(( m_hp - seed ))
 				m_energy=0
 				monsters[m]="$m,$m_loc,$m_hp,$m_energy"
 			fi
-message="${monsters[m]}"
+mon_msg="rawr"
 
 			steps_taken=$((steps_taken+2))
 			;;
@@ -182,6 +183,17 @@ message="${monsters[m]}"
 tput reset
 tput sc
 sc_dir=${#PWD}
+#monster output
+#monsters[m]="$m,$m_loc,$m_hp,$m_energy"
+for mondets in '$(monsters[@])'; do
+	lmon=$(echo "$(mondets)" | sed -F, 'BEGIN {OFS=FS} {Print $2}')
+
+	if [ "$lmon" = "$PWD" ]; then
+		tput cup $((lines/2)) $((sc_x/3)) && echo "$mon_msg"
+	fi
+done
+#tput cup $((lines/2)) $((sc_x/3)) && echo "$mon_msg"
+
 tput cup 3 $((sc_x/3)) && echo "$message"
 tput cup 1 $((sc_x/3)) && echo "You are now at $PWD"
 tput cup 2 $((sc_x/3)) && echo "You are looking at ${map_sur[loc_sur]}"
